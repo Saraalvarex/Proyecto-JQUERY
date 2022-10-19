@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+</head>
+<body>
+    <table border="1" id="tabladepart">
+        <thead>
+            <tr>
+                <th>Número</th>
+                <th>Nombre</th>
+                <th>Localidad</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <br>
+    <table border="1" id="tablaemp">
+        <thead>
+            <tr>
+                <th>Id empleado</th>
+                <th>Apellido</th>
+                <th>Oficio</th>
+                <th>Salario</th>
+                <th>Departamento</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <script src="js/jquery-3.6.1.min.js"></script>
+    <script>
+        let url = "https://apicruddepartamentoscore.azurewebsites.net/";
+        function cargarDepart(){
+        let request = "/api/Departamentos";
+        $("#tabladepart tbody").text("");
+        
+            $.ajax({
+                "url": url+request,
+                "method": "GET",
+                "dataType": "json",
+                success: function(data){
+                    console.log("cargando departamentos...");
+                    $.each(data, function(indice, departamento){
+                        var fila = $("<tr>");
+                        //Creo columna numero, nombre, localidad
+                        let colNumero = $("<td>", {"text": departamento.numero})
+                        let colNombre = $("<td>", {"text": departamento.nombre});
+                        let colLocalidad= $("<td>", {"text": departamento.localidad});
+                        //Añado columnas a filas
+                        fila.append(colNumero);
+                        fila.append(colNombre);
+                        fila.append(colLocalidad);
+                        
+                        let colBoton1 = $("<td>");
+                        fila.append(colBoton1);
+                        //Creo boton para ver los empleados de cada departamento
+                        let botonEmpleados = $("<button>", {"text": "Empleados "+ departamento.numero, "value": departamento.numero});
+                        colBoton1.append(botonEmpleados);
+                        //Boton para modificar departamento
+                        let colBoton2 = $("<td>");
+                        fila.append(colBoton2);
+                        let botonModif = $("<button>",
+                            {"text": "Editar depart "+ departamento.numero, "value": departamento.numero, "data-nombre": departamento.nombre,
+                             "data-localidad": departamento.localidad});
+                        colBoton2.append(botonModif);
+                        //Añado a tabla
+                        $("#tabladepart tbody").append(fila);
+
+                        botonEmpleados.click(function() {
+                            let url= "https://apiempleadosspgs.azurewebsites.net/";
+                            let numDept = $(this).val();
+                            let request = "api/Empleados/EmpleadosDepartamento/"+numDept;
+                            $.ajax({
+                                "url": url+request,
+                                "type": "GET",
+                                success: function(data){
+                                    $("#tablaemp tbody").text("");
+                                    
+                                    $.each(data, function(indice, empleado){
+                                            
+                                            let tabla = $("<table>");
+                                            let fila = $("<tr>");
+                                            
+                                            //Creo columna numero, nombre, localidad
+                                            let colId = $("<td>", {"text": empleado.idEmpleado})
+                                            let colApellido = $("<td>", {"text": empleado.apellido});
+                                            let colOficio = $("<td>", {"text": empleado.oficio});
+                                            let colSalario = $("<td>", {"text": empleado.salario});
+                                            let colDepart = $("<td>", {"text": empleado.departamento});
+                                            
+                                            //Añado columnas a filas
+                                            fila.append(colId);
+                                            fila.append(colApellido);
+                                            fila.append(colOficio);
+                                            fila.append(colSalario);
+                                            fila.append(colDepart);
+
+                                            tabla.append(fila);
+                                            //Añado a tabla
+                                            $("#tablaemp tbody").append(fila);
+                                    });
+                                }
+                            });
+                        });
+                        //Aqui primer boton para que salgan los input y poder editar
+                        //despues habrá otro boton que confirme el cambio
+                        botonModif.click(function() {
+                            
+                            console.log("Pendiente de confirmación de modificación");
+                            let url= "https://apicruddepartamentoscore.azurewebsites.net/";
+                            //requestModif = "api/Departamentos";
+                            
+                            let numDept = $(this).val();
+                            let nombreDept = $(this).data("nombre");
+                            let locDept = $(this).data("localidad");
+
+                            //Crear fila
+                            let fila = $("<tr>");
+                            //Crear inputs
+                            let inputNum = $("<input>", {"id": "inputId","val": numDept});
+                            //Atributo de desabilitado
+                            inputNum.attr("disabled","disabled");
+                            let inputNom = $("<input>", {"id": "inputNom", "val": nombreDept});
+                            let inputLoc = $("<input>", {"id": "inputLoc","val": locDept});
+                            let btn = $("<button>", {"id": "btn"+numDept, "text": "Confirmar edición","val": numDept});
+                            //Creo columnas
+                            var colNum = $("<td>");
+                            var colNombre = $("<td>");
+                            var colLoc = $("<td>");
+                            var colBtn = $("<td>");
+                            //Añado inputs a cols
+                            colNum.append(inputNum);
+                            colNombre.append(inputNom);
+                            colLoc.append(inputLoc);
+                            colBtn.append(btn);
+                            
+                            fila.append(colNum);
+                            fila.append(colNombre);
+                            fila.append(colLoc);
+                            fila.append(colBtn);
+                            $("#tablaemp thead").text("");
+                            $("#tablaemp tbody").text("");
+                            $("#tablaemp tbody").append(fila);
+
+                            $("#btn"+numDept).click(function(){
+                                //Creamos un nuevo objeto JS
+                                console.log("tamoo dentro")
+                                let departamento = new Object();
+                                //Las propiedades deben coincidir con el servicio
+                                departamento.numero = parseInt($("#inputId").val());
+                                departamento.nombre = ($("#inputNom").val());
+                                departamento.localidad = ($("#inputLoc").val());
+
+                                let dataJson= JSON.stringify(departamento);
+                                //Las propiedades deben coincidir con el servicio
+                                let requestPut = "api/Departamentos";
+                                console.log(dataJson);
+                                $.ajax({
+                                    "url": url+requestPut,
+                                    "type": "PUT",
+                                    "data": dataJson,
+                                    "contentType": "application/json",
+                                    success: function(){-
+                                        console.log("Modificado");
+                                        cargarDepart();
+                                    }
+                                });
+                            });
+                        });
+
+                    });
+                }
+            });
+        }
+
+        $(document).ready(function(){
+            cargarDepart();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+<link rel="canonical" href="https://getbootstrap.com/docs/5.2/examples/album/">
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<style>
+    img {
+        width: 200px;
+    }
+</style>
+</head>
+<body>
+    <h1>Players JSON</h1>
+    <select id="selectplayers"></select>
+    <br/>
+    <br/>
+    <table class="table-bordered" id="tablaJugador">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Posicion</th>
+                <th>Edad</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</body>
+<script src="js/jquery-3.6.1.min.js"></script>
+<script>
+    $(document).ready(function(){
+        //1º
+        //Al iniciar, leemos todos los jugadores y los guardamos
+        //en el <select>
+            $.getJSON("documents/jugadores.json", function(data){
+            $.each(data.jugadores, function(indice, jugador){
+                let name = jugador.nombre;
+                //Creamos un option por cada jugador
+                let option = $("<option>",  {
+                    "text": name
+                });
+                    $("#selectplayers").append(option);
+                })
+            });
+
+        //2º
+        //MOSTRAMOS LOS DATOS DEL JUGADOR seleccionado en <option>
+            
+        $("#selectplayers").change(function() {
+            //RECUPERAMOS EL INDICE DEL ELEMENTO SELECCIONADO
+            var indice = $(this).prop("selectedIndex");
+            console.log(indice);
+            cargarJugador(indice);
+        });
+    });
+
+        function cargarJugador(index){
+            console.log(index);
+            $.ajax({
+                "url": "documents/jugadores.json",
+                "method": "GET",
+                "dataType": "json",
+                success: function(data){
+                    let jugador = data.jugadores[index];
+                    console.log(jugador);
+                    $("#tablaJugador tbody").text("");
+                    //Lo comentado para recorrer tabla entera
+                    //$.each(data.jugadores, function(index, jugador){
+                        var fila = $("<tr>");
+                        var colNombre = $("<td>"
+                            , { "text": jugador.nombre});
+                        var colPosicion = $("<td>"
+                            , { "text": jugador.posicion});
+                        var colEdad = $("<td>", 
+                            { "text": jugador.edad});
+                        var colImg = $("<td>");
+                        var img = $("<img>", {"src": jugador.imagen})
+                        colImg.append(img)
+                        fila.append(colNombre);
+                        fila.append(colPosicion);
+                        fila.append(colEdad);
+                        fila.append(colImg);
+                        $("#tablaJugador tbody").append(fila);
+                    //});
+                }
+            });
+    }
+        
+            
+</script>
+</html>

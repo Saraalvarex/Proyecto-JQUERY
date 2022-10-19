@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+</head>
+<body>
+    <h1>Jugadores JSON</h1>
+    <select id="selectjugadores"></select>
+    <div id="contenido"></div>
+   
+    <script src="js/jquery-3.6.1.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            //Al seleccionar un elemento en el option
+            //Mostramos los datos del jugador
+            //No existen busquedas, debemos leer todo y dibujar 1
+            /*Propiedas de JS
+            let select = select.selectedIndex;*/
+            //let indice = $("#selectjugadores").prop("selectedIndex")
+            $("#selectjugadores").change(function() {
+                //recuperamos el indice del elemento seleccionado
+                let indice = $(this).prop("selectedIndex");
+                //Debemos acceder de nuevo al servicio
+                $.ajax({
+                    "url": "documents/jugadores.json",
+                    "method": "GET",
+                    success: function(data){
+                        let jugador = data.jugadores[indice];
+                        console.log(jugador);
+                        //let jugador = $(data).find("jugadores").eq(indice).text();
+                        //$(data).jugadores.eq(indice);
+                        let html = "<h1>" + jugador.nombre + "</h1>";
+                        html += "<h1>Posición: "+jugador.posicion +"</h1>";
+                        html += "<h1>Edad: "+jugador.edad +"</h1>";
+                        html += "<img src='"+jugador.imagen +"' style='width: 150px; height: 150px'/>";
+                        $("#contenido").html(html);
+                    }
+                });
+            });
+            //Al iniciar, leemos todos los jugadores y los guardamos
+            //en el <select>
+                $.getJSON("documents/jugadores.json", function(data){
+                    $.each(data.jugadores, function(indice, jugador){
+                        let name = jugador.nombre;
+                        //Creamos un option por cada jugador
+                        let option = $("<option>",  {
+                            "text": name
+                        });
+                        $("#selectjugadores").append(option);
+                    })
+                });
+        });
+    </script>
+</body>
+</html>

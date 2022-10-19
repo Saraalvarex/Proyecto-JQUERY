@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+</head>
+<body>
+    <h1>Departamentos Atributos XML</h1>
+    <label>Introduzca el ID: </label>
+    <input type="text" id="cajaid"/>
+    <button type="button" id="botonbuscarid">
+        Buscar departamento
+    </button><br>
+    <label>Introduzca localidad</label>
+    <input type="text" id="cajalocalidad"/>
+    <button type="button" id="botonbuscarlocalidad">
+        Buscar localidad
+    </button>
+    
+    <table style="border: red solid 1px;" id="tabladepartamentos">
+        <thead>
+            <tr>
+                <th>Numero</th>
+                <th>Nombre</th>
+                <th>Localidad</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <h1 stye="color: red" id="mensaje"></h1>
+    <br>
+    <button type="button" id="botondepartamentos">
+        Cargar deparatamentos
+    </button>
+
+    <script src="js/jquery-3.6.1.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $("#botonbuscarlocalidad").click(function(){
+                let loc = $("#cajalocalidad").val();
+                $.get("documents/departamentos.xml", function(data){
+                    //LOC: contains(GIJON)
+                    let filtro = "LOC:contains("+loc+")";
+                    let html = "";
+                    if ($(data).find(filtro).length ==0){
+                        html = "No existem departamentos en "+loc;
+                        console.log("Leyendo servicio...");
+                    } else {
+                        console.log("Leyendo servicio2...");
+                        $(data).find(filtro).each(function(){
+                            //<LOC>GIJON</LOC>
+                            html+=$(this).text() + ",";
+                        });
+                    }
+                    $("#mensaje").text(html);
+                });
+            });
+            $("#botonbuscarid").click(function(){
+                let id= $("#cajaid").val();
+                $.get("documents/departamentos.xml", function(data){
+                    console.log("Leyendo servicio...");
+                    let html = "";
+                    //FILTRO A MI BUSQUEDA
+                    let filtro = "DEPT[DEPT_NO="+ id +"]";
+                    //CAPTURAMOS EL NODO DE <DEPT>
+                    let nododept = $(data).find(filtro).first();
+                    let nombre = $(nododept).find("DNOMBRE").first().text();
+                    let localidad = $(nododept).find("LOC").first().text();
+                    html += "<tr>";
+                        html += "<td>"+nododept.attr("DEPT_NO")+"</td>";
+                        html += "<td>"+nombre+"</td>";
+                        html += "<td>"+localidad+"</td>";
+                    html += "<tr>";
+                        $("#tabladepartamentos tbody").html(html);
+                });
+            });
+
+
+
+            $("#botondepartamentos").click(function(){
+                console.log("Antes del servicio...");
+                $.get("documents/departamentos.xml", function(data){
+                    console.log("Leyendo servicio...");
+                    
+                    let html = "";
+                    //Recuperamos cada etiqueta DEPT
+                    $(data).find("DEPT").each(function(){
+                        
+                            html += "<tr>";
+                            let numero = $(this).attr("DEPT_NO");
+                            let nombre = $(this).find("DNOMBRE").first().text();
+                            let localidad = $(this).find("LOC").first().text();
+                            html += "<td>"+numero+"</td>";
+                            html += "<td>"+nombre+"</td>";
+                            html += "<td>"+localidad+"</td>";
+                            html += "<tr>";
+                    });
+                    $("#tabladepartamentos tbody").html(html);
+                })
+                console.log("Después del servicio...");
+            });
+        })
+    </script>
+</body>
+</html>

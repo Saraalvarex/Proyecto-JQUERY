@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>JSON COMPUESTO</h1>
+    <button type="button" id="botonleer">Leer clientes</button>
+    <div id="resultado"></div>
+    <script src="js/jquery-3.6.1.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $("#botonleer").click(function(){
+                $.ajax({
+                    //la parte de la izq no hace falta
+                    //que lleve comillas
+                    "url":"documents/clientes.json",
+                    "method": "GET",
+                    //No hace falta poner dataType si usamos JSON
+                    "dataType": "json",
+                    "success": function(data){
+                        console.log("Leyendo servicio");
+                        let html="";
+                        $.each(data.clientes, function(indice, cliente){
+                            //propiedades dinamicas
+                            let nombre = cliente.nombre;
+                            html += "<p>" +nombre +"</p>";
+                        });
+                        $("#resultado").html(html);
+                    }, "error": function(error){
+                        console.log("Error en el servicio");
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
